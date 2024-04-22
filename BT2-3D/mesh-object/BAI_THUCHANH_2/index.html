@@ -1,0 +1,114 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta
+            name="viewport"
+            content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+
+    <title>Starter app in 3D - 4.15</title>
+
+    <link
+            rel="stylesheet"
+            href="https://js.arcgis.com/4.15/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.15/"></script>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+    </style>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/SceneView",
+            "esri/layers/GraphicsLayer",
+            "esri/geometry/Mesh",
+            "esri/geometry/Point",
+            "esri/Graphic",
+            "esri/widgets/Popup"
+        ], function (
+            Map,
+            SceneView,
+            GraphicsLayer,
+            Mesh,
+            Point,
+            Graphic,
+            Popup
+        ) {
+            const sketchLayer = new GraphicsLayer({
+                elevationInfo: {
+                    mode: "absolute-height"
+                },
+                title: "Sketched geometries"
+            });
+            const map = new Map({
+                basemap: "topo-vector",
+                ground: "world-elevation"
+            });
+
+            const view = new SceneView({
+                container: "viewDiv",
+                map: map,
+                camera: {
+                    position: [106.70304101731452, 10.773949995733617, 320],
+                    heading: 0,
+                    tilt: 45
+                }
+            });
+
+            const popupTemplate = {
+                title: "Nhà hát Thành phố Hồ Chí Minh\n",
+                content: "Năm xây dựng: 1898 <br><br>" +
+                    "Diện tích: 3.200.000 m2 <br><br>" +
+                    "Công năng: Nhà hát được xây cao hơn mặt đường hai mét, với hệ thống hai lớp cửa cách âm ngăn tiếng ồn đường phố vào bên trong. Khán phòng hình ô voan ngăn tiếng vang, có sức chứa 468 khách, đảm bảo chất lượng âm thanh và tầm nhìn từ mọi ghế về sân khấu."
+            };
+
+            const popup = new Popup({
+                view: view,
+                content: popupTemplate
+            });
+
+            view.ui.add(popup, "top-right");
+
+            const operaHouse = new Point({
+                x: 106.70317691773405,
+                y: 10.776430691160364,
+                z: 11.5,
+            })
+
+            Mesh.createFromGLTF(operaHouse, "nha_hat_lon.glb")
+                .then(function (geometry) {
+                    geometry.scale(0.6, {origin: operaHouse})
+                    geometry.rotate(1, 1, -43);
+                    const graphic = new Graphic({
+                        geometry,
+                        symbol: {
+                            type: "mesh-3d",
+                            symbolLayers: [{
+                                type: "fill",
+                                size: 100,
+                            }]
+                        },
+                        popupTemplate: popupTemplate
+                    });
+                    sketchLayer.add(graphic)
+                })
+                .catch(console.error);
+
+            map.add(sketchLayer);
+        });
+    </script>
+</head>
+
+<body>
+<div id="viewDiv"></div>
+</body>
+</html>
