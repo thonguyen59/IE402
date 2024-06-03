@@ -1,0 +1,165 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Real-time Updates | ArcGIS Maps SDK for JavaScript 4.27</title>
+
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.27/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.27/"></script>
+
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/Graphic",
+            "esri/geometry/Point",
+            "esri/renderers/SimpleRenderer",
+            "esri/symbols/PictureMarkerSymbol",
+            "esri/symbols/TextSymbol",
+            "esri/PopupTemplate"
+        ], (Map, MapView, FeatureLayer, Graphic, Point, SimpleRenderer, PictureMarkerSymbol, TextSymbol, PopupTemplate) => {
+            // Tạo Map
+            const map = new Map({
+                basemap: "streets-navigation-vector"
+            });
+
+            // Tạo MapView
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [106.660172, 10.762622], // Tọa độ của Thành phố Hồ Chí Minh
+                zoom: 12
+            });
+
+            // Tạo FeatureLayer với dữ liệu client-side
+            const featureLayer = new FeatureLayer({
+                source: [], // Ban đầu là một mảng rỗng cho dữ liệu client-side
+                fields: [
+                    { name: "ObjectID", alias: "ObjectID", type: "oid" },
+                    { name: "name", alias: "Name", type: "string" },
+                    { name: "description", alias: "Description", type: "string" }
+                ],
+                objectIdField: "ObjectID",
+                renderer: new SimpleRenderer({
+                    symbol: new PictureMarkerSymbol({
+                        url: "./images/ePoint.jpg",
+                        height: "55px",
+                        width: '45px'
+                    })
+                }),
+                popupTemplate: new PopupTemplate({
+                    title: "{name}",
+                    content: `
+                    <div style="display: flex;">
+                        <div style="flex: 3; padding-right: 10px;">
+                            <img src="http://localhost:63343/IE402/Supervisor/images/green-dot.png" alt="Image" style="width: 100%; height: auto;">
+                        </div>
+                        <div style="flex: 1;">
+                            <div>{description}</div>
+                        </div>
+                    </div>`
+                })
+            });
+
+            map.add(featureLayer);
+
+            // Hàm thêm marker từ dữ liệu backend
+            function addOrUpdateMarker(data) {
+                const point = new Point({
+                    longitude: data.longitude,
+                    latitude: data.latitude
+                });
+
+                const attributes = {
+                    ObjectID: data.id,
+                    name: data.name,
+                    description: `
+                        <div>Line 1: ${data.line1}</div>
+                        <div>Line 2: ${data.line2}</div>
+                        <div>Line 3: ${data.line3}</div>
+                    `
+                };
+
+                let existingGraphic = featureLayer.source.items.find(g => g.attributes.ObjectID === data.id);
+                if (existingGraphic) {
+                    existingGraphic.geometry = point;
+                    existingGraphic.attributes = attributes;
+                } else {
+                    const pointGraphic = new Graphic({
+                        geometry: point,
+                        attributes: attributes
+                    });
+
+                    // Define the text symbol for the label
+                    const textSymbol = new TextSymbol({
+                        text: data.name,
+                        color: "black",
+                        haloColor: "white",
+                        haloSize: "1px",
+                        yoffset: 20, // Tăng yoffset để đặt text trên marker
+                        font: {
+                            size: 12,
+                            family: "sans-serif"
+                        }
+                    });
+
+                    const textGraphic = new Graphic({
+                        geometry: point,
+                        symbol: textSymbol
+                    });
+
+                    featureLayer.source.add(pointGraphic);
+                    view.graphics.add(textGraphic);
+                }
+            }
+
+            // Khởi tạo sẵn điểm cho Quận 1 và Quận 2
+            addOrUpdateMarker({
+                id: 1,
+                longitude: 106.7038,
+                latitude: 10.7769,
+                name: "Quận 1",
+                description: "Đây là Quận 1 của Thành phố Hồ Chí Minh.",
+                line1: "Nội dung Line 1",
+                line2: "Nội dung Line 2",
+                line3: "Nội dung Line 3"
+            });
+
+            addOrUpdateMarker({
+                id: 2,
+                longitude: 106.7499,
+                latitude: 10.7872,
+                name: "Quận 2",
+                description: "Đây là Quận 2 của Thành phố Hồ Chí Minh.",
+                line1: "Nội dung Line 1",
+                line2: "Nội dung Line 2",
+                line3: "Nội dung Line 3"
+            });
+
+            // setInterval(() => {
+            //     fetch('https://backend.example.com/api/points') // Thay bằng URL thực tế của bạn
+            //         .then(response => response.json())
+            //         .then(data => {
+            //             data.forEach(item => addOrUpdateMarker(item));
+            //         });
+            // }, 5000); // Cập nhật mỗi 5 giây
+        });
+    </script>
+</head>
+
+<body>
+<div id="viewDiv"></div>
+</body>
+</html>
