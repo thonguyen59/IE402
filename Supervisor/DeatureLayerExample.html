@@ -2,7 +2,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>Real-time Updates | ArcGIS Maps SDK for JavaScript 4.27</title>
+    <title>Bản đồ giám sát</title>
 
     <style>
         html,
@@ -39,7 +39,7 @@
             const view = new MapView({
                 container: "viewDiv",
                 map: map,
-                center: [106.660172, 10.762622], // Tọa độ của Thành phố Hồ Chí Minh
+                center: [106.660172, 10.762622],
                 zoom: 12
             });
 
@@ -49,9 +49,13 @@
                 fields: [
                     { name: "ObjectID", alias: "ObjectID", type: "oid" },
                     { name: "name", alias: "Name", type: "string" },
+                    { name: "title", alias: "Title", type: "string" },
+                    { name: "avatar", alias: "avatar", type: "string" },
+                    { name: "url", alias: "url", type: "string" },
                     { name: "description", alias: "Description", type: "string" }
                 ],
                 objectIdField: "ObjectID",
+
                 renderer: new SimpleRenderer({
                     symbol: new PictureMarkerSymbol({
                         url: "./images/ePoint.jpg",
@@ -59,12 +63,13 @@
                         width: '45px'
                     })
                 }),
+
                 popupTemplate: new PopupTemplate({
-                    title: "{name}",
+                    title: "{title}",
                     content: `
                     <div style="display: flex;">
-                        <div style="flex: 3; padding-right: 10px;">
-                            <img src="http://localhost:63343/IE402/Supervisor/images/green-dot.png" alt="Image" style="width: 100%; height: auto;">
+                        <div style="flex: 3; padding-right: 10px; width: 70px">
+                            <img src="http://localhost:63343/IE402/Supervisor/images/avatar1.png" alt="Image" style="width: 100%; height: auto;">
                         </div>
                         <div style="flex: 1;">
                             <div>{description}</div>
@@ -85,11 +90,10 @@
                 const attributes = {
                     ObjectID: data.id,
                     name: data.name,
-                    description: `
-                        <div>Line 1: ${data.line1}</div>
-                        <div>Line 2: ${data.line2}</div>
-                        <div>Line 3: ${data.line3}</div>
-                    `
+                    description: data.content,
+                    title: data.title,
+                    url: data.url,
+                    avatar: data.avatar,
                 };
 
                 let existingGraphic = featureLayer.source.items.find(g => g.attributes.ObjectID === data.id);
@@ -125,29 +129,6 @@
                 }
             }
 
-            // Khởi tạo sẵn điểm cho Quận 1 và Quận 2
-            addOrUpdateMarker({
-                id: 1,
-                longitude: 106.7038,
-                latitude: 10.7769,
-                name: "Quận 1",
-                description: "Đây là Quận 1 của Thành phố Hồ Chí Minh.",
-                line1: "Nội dung Line 1",
-                line2: "Nội dung Line 2",
-                line3: "Nội dung Line 3"
-            });
-
-            addOrUpdateMarker({
-                id: 2,
-                longitude: 106.7499,
-                latitude: 10.7872,
-                name: "Quận 2",
-                description: "Đây là Quận 2 của Thành phố Hồ Chí Minh.",
-                line1: "Nội dung Line 1",
-                line2: "Nội dung Line 2",
-                line3: "Nội dung Line 3"
-            });
-
             // setInterval(() => {
             //     fetch('https://backend.example.com/api/points') // Thay bằng URL thực tế của bạn
             //         .then(response => response.json())
@@ -155,6 +136,56 @@
             //             data.forEach(item => addOrUpdateMarker(item));
             //         });
             // }, 5000); // Cập nhật mỗi 5 giây
+
+            // Khởi tạo dữ liệu hiển thị demo
+            addOrUpdateMarker({
+                id: 1,
+                longitude: 106.7038,
+                latitude: 10.7769,
+                name: "E001 - Thọ NT",
+                title: "Nguyễn Trường Thọ",
+                url: "./images/ePoint.jpg",
+                description: "",
+                avatar: "http://localhost:63343/IE402/Supervisor/images/avatar1.png",
+                content: "<div><img src=\"http://localhost:63343/IE402/Supervisor/images/store.png\" alt=\"Image\" style=\"height: auto; width: 18px\"/>  Bách hóa xanh</div>\n " +
+                    `<div><img src="http://localhost:63343/IE402/Supervisor/images/green-dot.png" alt="Image" style="height: auto; width: 16px"/> Đang trong ca làm</div>`,
+            });
+
+            addOrUpdateMarker({
+                id: 2,
+                longitude: 106.70136640001616,
+                latitude: 10.740553010823318,
+                name: "E002 - Dương LT",
+                title: "Lý Thanh Dương",
+                description: "",
+                avatar: "http://localhost:63343/IE402/Supervisor/images/avatar1.png",
+                content: "<div><img src=\"http://localhost:63343/IE402/Supervisor/images/store.png\" alt=\"Image\" style=\"height: auto; width: 18px\"/>  Bách hóa xanh</div>\n " +
+                    `<div><img src="http://localhost:63343/IE402/Supervisor/images/green-dot.png" alt="Image" style="height: auto; width: 16px"/> Đang trong ca làm</div>`,
+            });
+
+            addOrUpdateMarker({
+                id: 3,
+                longitude: 106.66800513012414,
+                latitude: 10.751457281439068,
+                name: "E003 - Tân ND",
+                title: "NGuyễn Duy Tân",
+                description: "",
+                avatar: "http://localhost:63343/IE402/Supervisor/images/avatar1.png",
+                content: "<div><img src=\"http://localhost:63343/IE402/Supervisor/images/store.png\" alt=\"Image\" style=\"height: auto; width: 18px\"/>  Bách hóa xanh</div>\n " +
+                    `<div><img src="http://localhost:63343/IE402/Supervisor/images/green-dot.png" alt="Image" style="height: auto; width: 16px"/> Đang trong ca làm</div>`,
+            });
+
+            addOrUpdateMarker({
+                id: 4,
+                longitude: 106.64807797644904,
+                latitude: 10.7672513784163,
+                name: "C001 - Thang PD",
+                title: "Phạm Đình Thắng",
+                description: "",
+                avatar: "http://localhost:63343/IE402/Supervisor/images/avatar1.png",
+                content: "<div><img src=\"http://localhost:63343/IE402/Supervisor/images/store.png\" alt=\"Image\" style=\"height: auto; width: 18px\"/>  Bách hóa xanh</div>\n " +
+                    `<div><img src="http://localhost:63343/IE402/Supervisor/images/green-dot.png" alt="Image" style="height: auto; width: 16px"/> Đang trong ca làm</div>`,
+            });
         });
     </script>
 </head>
